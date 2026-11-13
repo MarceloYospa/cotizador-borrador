@@ -131,6 +131,31 @@ html:not(.movil) #lines td:nth-child(1) input{min-width:140px!important}
 html:not(.movil) #lines td:nth-child(2){min-width:280px}
 html:not(.movil) #lines td:nth-child(2) input{width:100%;text-overflow:ellipsis}
 html:not(.movil) table:has(#lines){min-width:920px}
+.cpw{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 14px;align-items:stretch}
+.cpw>div>.card:last-child,.cpw>.card{margin-bottom:0}
+#cp_res{position:absolute;left:0;right:0;top:100%;z-index:6;background:var(--card);box-shadow:0 8px 20px rgba(0,0,0,.3);max-height:260px}
+#cp_lines{min-height:240px;max-height:55vh}
+@media (max-width:900px){.cpw{grid-template-columns:1fr;gap:14px 0}}
+html.movil body{font-size:17px}
+html.movil h1{font-size:22px}html.movil h2{font-size:18px}
+html.movil label{font-size:14px;margin-bottom:4px}
+html.movil input,html.movil select,html.movil button{font-size:17px;min-height:46px}
+html.movil .muted{font-size:14px}
+html.movil .res div{padding:12px;font-size:16px}
+html.movil [id$=view]{padding-left:12px!important;padding-right:12px!important}
+html.movil #home h1{font-size:34px;letter-spacing:3px}
+html.movil #home .sub{letter-spacing:3px;font-size:12px}
+html.movil #hgrid{grid-template-columns:1fr 1fr;gap:10px}
+html.movil #hgrid button{padding:14px 6px;font-size:15px;min-height:100px}
+html.movil #hgrid b{font-size:28px}
+html.movil #lp_b tr,html.movil #nc_b tr{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;background:var(--card)}
+html.movil #lp_b td,html.movil #nc_b td{display:block;border:0;padding:0;text-align:left!important}
+html.movil #lp_b td:nth-child(-n+2),html.movil #nc_b td:nth-child(-n+2){grid-column:1/-1}
+html.movil #lp_b td:nth-child(2),html.movil #nc_b td:nth-child(2){font-weight:600}
+html.movil #lp_b td:nth-child(n+3)::before,html.movil #nc_b td:nth-child(n+3)::before{display:block;font-size:12px;color:var(--muted)}
+html.movil #lp_b td:nth-child(3)::before{content:"Precio c/IVA"}html.movil #lp_b td:nth-child(4)::before{content:"Desc. %"}html.movil #lp_b td:nth-child(5)::before{content:"Precio c/desc."}html.movil #lp_b td:nth-child(6)::before{content:"Stock"}
+html.movil #nc_b td:nth-child(3)::before{content:"Facturado"}html.movil #nc_b td:nth-child(4)::before{content:"Ya acreditado"}html.movil #nc_b td:nth-child(5)::before{content:"Acreditar"}html.movil #nc_b td:nth-child(6)::before{content:"Precio unit."}html.movil #nc_b td:nth-child(7)::before{content:"Importe"}
+html.movil #lp_b td input,html.movil #nc_b td input{max-width:none!important;width:100%}
 </style>
 </head>
 <body>
@@ -189,7 +214,7 @@ html:not(.movil) table:has(#lines){min-width:920px}
 <section class="card">
 <h2>3. Detalle</h2>
 <div class="noprint">
-<input id="q" placeholder="Buscar artículo por código o descripción" autocomplete="off">
+<input id="q" placeholder="Buscar artículo por código o descripción (mín. 3 letras)" autocomplete="off">
 <div class="res" id="res" style="display:none"></div>
 
 </div>
@@ -346,7 +371,7 @@ try{var sv=JSON.parse(localStorage.getItem("fact_articulos")||"null");if(sv&&sv.
 
 $("q").oninput=function(){
   var q=norm(this.value).trim(),box=$("res");var terms=q.split(/\s+/).filter(Boolean);curOut=[];
-  if(!q){box.style.display="none";return}
+  if(q.length<3){box.style.display="none";return}
   var out=articles.filter(function(a){if(a.off)return false;var h=a._h||norm(a.code+" "+a.desc);return terms.every(function(t){return h.indexOf(t)>-1})}).slice(0,25);curOut=out;selIdx=0;setTimeout(markSel,0);
   box.style.display="";
   box.innerHTML="";
@@ -742,7 +767,7 @@ function stRender(){
 function saveDraft(){try{localStorage.setItem("fact_borrador",JSON.stringify({t:$("tipo").value,pv:$("pv").value,nro:$("nro").value,cli:$("cli").value,cuit:$("cuit").value,civa:$("civa").value,obs:$("obs").value,lines:lines}))}catch(e){}}
 function loadDraft(){var d=DRAFT;DRAFT=null;if(!d||((!d.lines||!d.lines.length)&&!d.cli))return;try{$("tipo").value=d.t;$("pv").value=d.pv;$("nro").value=d.nro;$("cli").value=d.cli||"";$("cuit").value=d.cuit||"";$("civa").value=d.civa;$("obs").value=d.obs||"";lines=d.lines||[];renderLines();setMsg("Se recuperó el borrador anterior.")}catch(e){}}
 $("cmp").addEventListener("input",saveDraft);$("cmp").addEventListener("change",saveDraft);$("obs").addEventListener("input",saveDraft);
-[["F2","Imprimir","pdf"],["F4","Ventas","ventas"],["F8","Estadísticas","stats"],["F6","Clientes","cmaster"],["F12","Artículos","maestro"],["F10","Vaciar","clear"]].forEach(function(x){var b=document.createElement("button");b.type="button";b.id="bb_"+x[2];b.textContent=x[0]+" "+x[1];b.onclick=function(){$(x[2]).click()};$("barbtns").appendChild(b)});
+[["F2","Imprimir","pdf"],["F4","Ventas","ventas"],["F6","Clientes","cmaster"],["F12","Artículos","maestro"],["F10","Vaciar","clear"]].forEach(function(x){var b=document.createElement("button");b.type="button";b.id="bb_"+x[2];b.textContent=x[0]+" "+x[1];b.onclick=function(){$(x[2]).click()};$("barbtns").appendChild(b)});
 (function(){var m=document.querySelector("main");m.classList.add("two");$("cmp").closest("section").classList.add("colR");$("lines").closest("section").classList.add("colL");$("obs").closest("section").classList.add("colR");$("pdf").closest(".row").classList.add("colR")})();
 loadDraft();
 var SHEET_ID="1phsrV6pjgcYKwYolv9pRoPRlvT6ft2cYWAb_Jsdcj_g";
@@ -859,7 +884,7 @@ function mKey(e){
 }
 $("mt_find").oninput=function(){
   var q=norm(this.value).trim(),box=$("mt_res");mCur=[];
-  if(!q){box.style.display="none";return}
+  if(q.length<3){box.style.display="none";return}
   var T=q.split(/\s+/).filter(Boolean),out=[];
   for(var i=0;i<articles.length&&out.length<15;i++){var a=articles[i],h=a._h||"";if(T.every(function(t){return h.indexOf(t)>-1}))out.push(a)}
   mCur=out;box.style.display="";box.innerHTML="";
@@ -972,7 +997,7 @@ function clKey(e){
 }
 $("cl_find").oninput=function(){
   var q=norm(this.value).trim(),box=$("cl_res");clCur=[];
-  if(!q){box.style.display="none";return}
+  if(q.length<3){box.style.display="none";return}
   var T=q.split(/\s+/).filter(Boolean),out=[],ks=Object.keys(clientes);
   for(var i=0;i<ks.length&&out.length<15;i++){var c=clientes[ks[i]],h=norm(c.name+" "+c.cuit+" "+(c.loc||"")+" "+(c.email||""));if(T.every(function(t){return h.indexOf(t)>-1}))out.push(c)}
   clCur=out;box.style.display="";box.innerHTML="";
@@ -1000,7 +1025,7 @@ document.addEventListener("keydown",function(e){
   if($("cview").style.display==="block"){clKey(e);return}
   if($("mview").style.display==="block"){mKey(e);return}
   if($("stview").style.display==="block"){if(e.key==="Escape"||e.key==="F8"){e.preventDefault();stClose()}return}
-  var fk={F2:"pdf",F4:"ventas",F6:"cmaster",F8:"stats",F10:"clear",F12:"maestro"};
+  var fk={F2:"pdf",F4:"ventas",F6:"cmaster",F10:"clear",F12:"maestro"};
   if(fk[e.key]){e.preventDefault();$(fk[e.key]).click();return}
   if($("cres").style.display!=="none"&&cCur.length&&(e.target.id==="cli"||e.target.id==="cuit")){
     if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();cSel=(cSel+(e.key==="ArrowDown"?1:-1)+cCur.length)%cCur.length;cMark();return}
@@ -1075,7 +1100,7 @@ $("em_del").onclick=function(){if(!emSel)return;EMPS=EMPS.filter(function(e){ret
 $("bk_dl").onclick=function(){var o={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(/^(fact_|seder_)/.test(k))o[k]=localStorage.getItem(k)}dlBlob(new Blob([JSON.stringify(o)],{type:"application/json"}),"seder-copia-"+new Date().toISOString().slice(0,10)+".json");setMsg("Copia descargada: precios, stock, empresas y ventas.")};
 $("bk_up").onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);Object.keys(o).forEach(function(k){if(/^(fact_|seder_)/.test(k))localStorage.setItem(k,o[k])});setMsg("Copia restaurada. Recargando...");setTimeout(function(){location.reload()},600)}catch(e){setMsg("No se pudo leer la copia.")}};r.readAsText(f)};
 /* --- Compras --- */
-mkV("cpview","🛒 Compras",'<div class="card"><div class="grid"><div><label>Proveedor</label><input id="cp_prov" style="text-transform:uppercase"></div><div><label>Comprobante N°</label><input id="cp_nro"></div></div></div><div class="card"><div class="grid"><div><label>Código, descripción o código de barras</label><input id="cp_code" autocomplete="off"></div><div style="grid-column:span 2"><label>Descripción</label><input id="cp_desc" style="text-transform:uppercase"></div><div><label>Cantidad</label><input id="cp_qty" inputmode="numeric" value="1"></div><div><label>Costo unit. ($)</label><input id="cp_cost" inputmode="decimal"></div><div><label>Precio venta ($, con IVA)</label><input id="cp_price" inputmode="decimal"></div><div><label>IVA %</label><select id="cp_iva"><option>0</option><option>2.5</option><option>5</option><option>10.5</option><option selected>21</option><option>27</option></select></div></div><div class="res" id="cp_res" style="display:none;max-height:220px"></div><div class="muted" id="cp_st"></div><div class="row" style="margin-top:8px"><button class="p" id="cp_add">Agregar a la compra</button></div></div><div class="card"><div class="res" id="cp_lines" style="max-height:240px;display:block"></div><div class="row" style="margin-top:8px"><button class="p" id="cp_ok">Confirmar compra y sumar stock</button><button id="cp_clr">Vaciar</button></div></div>');
+mkV("cpview","🛒 Compras",'<div class="cpw"><div><div class="card"><div class="grid"><div><label>Proveedor</label><input id="cp_prov" style="text-transform:uppercase"></div><div><label>Comprobante N°</label><input id="cp_nro"></div></div></div><div class="card"><div class="grid"><div style="position:relative"><label>Código, descripción o código de barras</label><input id="cp_code" autocomplete="off"><div class="res" id="cp_res" style="display:none"></div></div><div style="grid-column:span 2"><label>Descripción</label><input id="cp_desc" style="text-transform:uppercase"></div><div><label>Cantidad</label><input id="cp_qty" inputmode="numeric" value="1"></div><div><label>Costo unit. ($)</label><input id="cp_cost" inputmode="decimal"></div><div><label>Precio venta ($, con IVA)</label><input id="cp_price" inputmode="decimal"></div><div><label>IVA %</label><select id="cp_iva"><option>0</option><option>2.5</option><option>5</option><option>10.5</option><option selected>21</option><option>27</option></select></div></div><div class="muted" id="cp_st"></div><div class="row" style="margin-top:8px"><button class="p" id="cp_add">Agregar a la compra</button></div></div></div><div class="card"><h2>Renglones de la compra</h2><div class="res" id="cp_lines" style="display:block"></div><div class="row" style="margin-top:8px"><button class="p" id="cp_ok">Confirmar compra y sumar stock</button><button id="cp_clr">Vaciar</button></div></div></div>');
 var CP=[];
 function cpFind(v){v=String(v).trim();if(!v)return null;var p=padCode(v);return articles.filter(function(a){return a.code===p||a.code===v||(a.barcode&&a.barcode===v)})[0]||null}
 function cpLook(){var a=cpFind($("cp_code").value);if(a){$("cp_code").value=a.code;$("cp_desc").value=a.desc;$("cp_cost").value=a.cost?fmt4(a.cost):"";$("cp_price").value=a.price?fmt4(a.price):"";$("cp_iva").value=String(a.iva||21);$("cp_st").textContent="Artículo existente · stock actual "+stkGet(a.code)}else $("cp_st").textContent=$("cp_code").value.trim()?"Artículo nuevo: se dará de alta (completá descripción y precio de venta).":""}
@@ -1083,7 +1108,7 @@ function cpDraw(){var b=$("cp_lines");b.innerHTML="";CP.forEach(function(l,i){va
 function cpOpen(){$("cpview").style.display="block";cpDraw();$("cp_code").focus()}
 var cpC=[],cpS=0;
 function cpMark(){var ch=$("cp_res").children;for(var i=0;i<ch.length;i++)ch[i].classList.toggle("sel",i===cpS)}
-function cpRes(){var q=$("cp_code").value.trim().toUpperCase(),b=$("cp_res");b.innerHTML="";cpC=[];cpS=0;if(q.length<2){b.style.display="none";return}
+function cpRes(){var q=$("cp_code").value.trim().toUpperCase(),b=$("cp_res");b.innerHTML="";cpC=[];cpS=0;if(q.length<3){b.style.display="none";return}
   cpC=articles.filter(function(a){return !a.off&&(a.code.indexOf(q)>=0||String(a.desc).toUpperCase().indexOf(q)>=0||(a.barcode&&String(a.barcode).indexOf(q)>=0))}).slice(0,12);
   b.style.display=cpC.length?"block":"none";cpC.forEach(function(a){var d=document.createElement("div");d.textContent=a.code+" · "+a.desc+(a.barcode?" · "+a.barcode:"");d.onmousedown=function(ev){ev.preventDefault();cpPick(a)};b.appendChild(d)});cpMark()}
 function cpPick(a){$("cp_code").value=a.code;$("cp_res").style.display="none";cpC=[];cpLook();$("cp_qty").focus()}
@@ -1103,7 +1128,7 @@ $("cp_ok").onclick=function(){if(!CP.length){setMsg("No hay renglones en la comp
 /* --- Lista de precios --- */
 mkV("lpview","💲 Lista de precios",'<div class="card"><div class="row"><input id="lp_f" placeholder="Filtrar por código o descripción" style="max-width:320px"><input id="lp_pct" placeholder="% variación" inputmode="decimal" style="max-width:130px"><button class="p" id="lp_up">Aumentar precios</button><button id="lp_dn">Bajar precios</button><button id="lp_undo">Deshacer</button><button id="lp_csv">Exportar CSV</button></div><div class="muted" id="lp_n"></div></div><div class="card"><div class="scroll"><table><thead><tr><th>Código</th><th>Descripción</th><th class="n">Precio c/IVA</th><th class="n">Desc. %</th><th class="n">Precio c/desc.</th><th class="n">Stock</th></tr></thead><tbody id="lp_b"></tbody></table></div></div>');
 var lpU=[];
-function lpSet(){var f=$("lp_f").value.trim().toUpperCase();return articles.filter(function(a){return !a.off&&(!f||a.code.indexOf(f)>=0||String(a.desc).toUpperCase().indexOf(f)>=0)})}
+function lpSet(){var f=$("lp_f").value.trim().toUpperCase();if(f.length<3)f="";return articles.filter(function(a){return !a.off&&(!f||a.code.indexOf(f)>=0||String(a.desc).toUpperCase().indexOf(f)>=0)})}
 function lpDraw(){var L=lpSet(),b=$("lp_b"),st=LS(stkK(),{});$("lp_n").textContent=L.length+" artículos"+(L.length>150?" (se muestran 150; el % de variación se aplica a todos los filtrados)":"");b.innerHTML="";
   L.slice(0,150).forEach(function(a){var tr=document.createElement("tr"),dc=a.disc!=null?a.disc:25;tr.innerHTML="<td>"+esc(a.code)+"</td><td>"+esc(a.desc)+'</td><td class="n"><input data-f="price" value="'+fmtP(a.price)+'"></td><td class="n"><input data-f="disc" value="'+dc+'" style="max-width:70px"></td><td class="n">'+fmt(a.price*(1-dc/100))+'</td><td class="n">'+(st[a.code]||0)+"</td>";
     tr.querySelectorAll("input").forEach(function(i){i.onchange=function(){var v=num(i.value),f=i.dataset.f;if(f==="disc")v=Math.min(40,Math.max(0,v));if(f==="price"&&!(v>0))return;var p={};p[f]=v;mUp(a.code,p);applyMaestro();lpDraw()}});b.appendChild(tr)})}
@@ -1118,7 +1143,7 @@ $("lp_csv").onclick=function(){var st=LS(stkK(),{}),o=["Código;Descripción;Pre
 mkV("ncview","↩️ Nota de crédito",'<div class="card"><label>Buscar factura emitida (número, cliente o CUIT)</label><input id="nc_q" autocomplete="off"><div class="res" id="nc_res" style="max-height:200px;display:block"></div></div><div class="card" id="nc_box" style="display:none"><h2 id="nc_h"></h2><div class="scroll"><table><thead><tr><th>Código</th><th>Descripción</th><th class="n">Facturado</th><th class="n">Ya acreditado</th><th class="n">Acreditar</th><th class="n">Precio unit.</th><th class="n">Importe</th></tr></thead><tbody id="nc_b"></tbody></table></div><div class="row" style="margin-top:8px"><button id="nc_all">Total</button><button id="nc_none">Ninguno</button><strong id="nc_tot" style="margin-left:auto"></strong><button class="p" id="nc_ok">Emitir nota de crédito (PDF)</button></div></div>');
 var NCv=null;
 function ncDone(key){var r={};ventas.forEach(function(x){if(x.ref===key)x.lines.forEach(function(l){r[l.code]=(r[l.code]||0)-l.qty})});return r}
-function ncSearch(){var q=$("nc_q").value.trim().toUpperCase(),b=$("nc_res");b.innerHTML="";ventas.filter(function(v){return !v.nc&&/^[ABC]$/.test(v.tipo)&&(!q||(v.key+" "+v.cli+" "+v.cuit).toUpperCase().indexOf(q)>=0)}).sort(function(a,b){return b.fecha.localeCompare(a.fecha)||b.key.localeCompare(a.key)}).slice(0,30).forEach(function(v){var d=document.createElement("div");d.textContent=v.key+" · "+v.fecha.split("-").reverse().join("/")+" · "+v.cli+" · "+fm(v.total);d.onclick=function(){ncPick(v)};b.appendChild(d)})}
+function ncSearch(){var q=$("nc_q").value.trim().toUpperCase(),b=$("nc_res");if(q.length<3)q="";b.innerHTML="";ventas.filter(function(v){return !v.nc&&/^[ABC]$/.test(v.tipo)&&(!q||(v.key+" "+v.cli+" "+v.cuit).toUpperCase().indexOf(q)>=0)}).sort(function(a,b){return b.fecha.localeCompare(a.fecha)||b.key.localeCompare(a.key)}).slice(0,30).forEach(function(v){var d=document.createElement("div");d.textContent=v.key+" · "+v.fecha.split("-").reverse().join("/")+" · "+v.cli+" · "+fm(v.total);d.onclick=function(){ncPick(v)};b.appendChild(d)})}
 function ncOpen(){$("ncview").style.display="block";$("nc_box").style.display="none";ncSearch();$("nc_q").focus()}
 $("nc_q").oninput=ncSearch;
 function ncPick(v){NCv=v;var dn=ncDone(v.key),b=$("nc_b");b.innerHTML="";$("nc_box").style.display="";$("nc_h").textContent="Factura "+v.tipo+" "+v.pv+"-"+v.nro+" · "+v.cli+" · "+fm(v.total);
