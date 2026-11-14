@@ -176,10 +176,12 @@ html.movil #cp_lines td:nth-child(n+4)::before{display:block;font-size:12px;colo
 #cl_cuitmsg{position:absolute;left:0;top:100%;margin-top:2px;white-space:nowrap}
 #cview>.card{margin-bottom:14px}
 @media (max-width:700px){.cg>div{grid-column:span 12!important}.cg>div:nth-child(5),.cg>div:nth-child(6),.cg>div:nth-child(7),.cg>div:nth-child(9){grid-column:span 6!important}}
-#sttabs table{table-layout:fixed;width:100%}
-#sttabs td:first-child,#sttabs th:first-child{width:42%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sttabs table{table-layout:auto;width:100%}
+#sttabs td,#sttabs th{white-space:nowrap}
+#sttabs td.n,#sttabs th.n{width:1%;padding-left:14px}
+#sttabs td.tc,#sttabs th.tc{width:11ch;max-width:11ch;overflow:hidden;text-overflow:ellipsis}
+#sttabs td.tf,#sttabs th.tf{max-width:0;width:100%;overflow:hidden;text-overflow:ellipsis}
 #sttabs>.card.wide{grid-column:1/-1!important;max-width:none!important}
-#sttabs .wide td:first-child,#sttabs .wide th:first-child{width:64%}
 html.movil .sttxt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal}
 @keyframes bzb{50%{opacity:.25}}
 </style><style>#home{position:fixed;inset:0;z-index:45;background:linear-gradient(160deg,#0b3d2e,#1b7f46 55%,#0f5132);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:20px;overflow:auto}#home h1{font-size:clamp(34px,7vw,64px);margin:0;letter-spacing:5px;color:#fff}#home .sub{letter-spacing:6px;font-size:14px;opacity:.85}#hgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;width:min(860px,100%)}#hgrid button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:16px;padding:22px 10px;font-size:15px;font-weight:700;cursor:pointer}#hgrid button:hover,#hgrid button:focus{background:rgba(255,255,255,.26);outline:none}#hgrid b{display:block;font-size:30px;margin-bottom:6px}html:not(.fxr) #hgrid button{opacity:0}#hgrid button{will-change:transform}#hfoot a{color:#fff;text-decoration:none;font-size:17px;letter-spacing:1px}</style>
@@ -754,6 +756,7 @@ function mkFetch(){
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
 function stClose(){$("stview").style.display="none";try{$("q").focus()}catch(e){}}
 function stOpen(){$("stview").style.display="block";stRender();try{$("stclose").focus()}catch(e){}}
+function cls(i,t){return i>=t?' class="n"':(t>1&&i===0?' class="tc"':' class="tf"')}
 function stTab(title,head,rows,txt){
   if(!rows.length)return "";
   if(document.documentElement.classList.contains("movil")){
@@ -762,7 +765,7 @@ function stTab(title,head,rows,txt){
       return '<div class="strow"><div class="sttxt">'+t+'</div><div class="stnum">'+n.map(function(x,i){return '<span><i>'+head[txt+i]+'</i> '+x+'</span>'}).join("")+'</div></div>'
     }).join("")+'</div>';
   }
-  return '<div class="card'+(/roducto|rtículo/i.test(title)?' wide':'')+'"><h2>'+title+'</h2><div class="scroll"><table><thead><tr>'+head.map(function(x,i){return '<th'+(i>=txt?' class="n"':'')+'>'+x+'</th>'}).join("")+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(x,i){return '<td'+(i>=txt?' class="n"':'')+'>'+x+'</td>'}).join("")+'</tr>'}).join("")+'</tbody></table></div></div>';
+  return '<div class="card'+(/roducto|rtículo/i.test(title)?' wide':'')+'"><h2>'+title+'</h2><div class="scroll"><table><thead><tr>'+head.map(function(x,i){return '<th'+cls(i,txt)+'>'+x+'</th>'}).join("")+'</tr></thead><tbody>'+rows.map(function(r){return '<tr>'+r.map(function(x,i){return '<td'+cls(i,txt)+'>'+x+'</td>'}).join("")+'</tr>'}).join("")+'</tbody></table></div></div>';
 }
 function stRender(){
   var per=$("stper").value,ymd=new Date().toLocaleDateString("en-CA",{timeZone:TZ});
@@ -1100,7 +1103,7 @@ function svKey(e){
   if(o){if(e.key==="Escape"){e.preventDefault();o.style.display="none";return true}
     var t=e.target;if(e.key==="Enter"&&t&&t.id==="cp_iva"){e.preventDefault();$("cp_add").focus();return true}if(e.key==="Enter"&&!e.defaultPrevented&&t&&((t.tagName==="INPUT"&&t.type!=="file")||t.tagName==="SELECT")){e.preventDefault();var all=[].slice.call(o.querySelectorAll("input,select")).filter(function(x){return x.type!=="file"&&x.offsetParent!==null&&!x.disabled&&!x.readOnly}),i=all.indexOf(t),n=all[i+(e.shiftKey?-1:1)];if(n)n.focus();else if(o.id==="emview"&&!e.shiftKey)$("em_save").click()}
     return true}
-  if(home.style.display!=="none"){var bs=[].slice.call($("hgrid").children),ix=bs.indexOf(document.activeElement),k=HM.map(function(x){return x[2]}).indexOf(e.key);
+  if(home.style.display!=="none"){if(e.key==="Escape"){if(document.fullscreenElement){e.preventDefault();document.exitFullscreen()}return true}var bs=[].slice.call($("hgrid").children),ix=bs.indexOf(document.activeElement),k=HM.map(function(x){return x[2]}).indexOf(e.key);
     if(k>=0||/^[1-8]$/.test(e.key)){e.preventDefault();bs[k>=0?k:+e.key-1].click()}
     else if(/^Arrow/.test(e.key)){e.preventDefault();var cols=bs.filter(function(b){return b.offsetTop===bs[0].offsetTop}).length||1,dl={ArrowRight:1,ArrowLeft:-1,ArrowDown:cols,ArrowUp:-cols}[e.key];ix=ix<0?0:Math.max(0,Math.min(bs.length-1,ix+dl));bs[ix].focus()}
     else if(/^F\d+$/.test(e.key))e.preventDefault();
@@ -1224,6 +1227,7 @@ function homeFx(){var t=3,bs=[].slice.call($("hgrid").children),R=Math.random,H=
   setTimeout(function(){bs.forEach(function(b){b.style.transition="transform "+t+"s cubic-bezier(.22,.9,.3,1)";b.style.transform="none"})},80)}
 
 homeFx();
+document.addEventListener("fullscreenchange",function(){try{var k=navigator.keyboard;if(!k)return;if(document.fullscreenElement){if(k.lock)k.lock(["Escape"]).catch(function(){})}else if(k.unlock)k.unlock()}catch(x){}});
 var bz=document.createElement("div");bz.id="busy";bz.className="noprint";bz.style.cssText="display:none;position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.6);color:#fff;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:20px;font-weight:700;text-align:center;padding:20px";bz.innerHTML='<div style="font-size:56px;animation:bzb 1s steps(2,start) infinite">⏳</div><div id="busytxt" style="animation:bzb 1s steps(2,start) infinite"></div>';document.body.appendChild(bz);
 function busy(on,t){bz.style.display=on?"flex":"none";$("busytxt").textContent=t||"Cargando…"}
 $("mt_xib").onclick=function(){$("mt_xi").click()};$("bk_upb").onclick=function(){$("bk_up").click()};
